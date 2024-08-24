@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState, useRef, useEffect } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import { Box, Flex, Input, Button, Switch, Label as ThemeUILabel } from 'theme-ui'
 import satori from 'satori'
 import { saveAs } from 'file-saver'
@@ -53,65 +53,7 @@ export const Sidebar = () => {
   const [isEditorExpanded, setIsEditorExpanded] = useState(false)
   const [isQueryVarExpanded, setIsQueryVarExpanded] = useState(true)
   const [isUIMode, setIsUIMode] = useState(false)
-
-  const iframeRef = useRef(null)
-  const [iframeLoading, setIframeLoading] = useState(false)
-
-  const fetchTitle = async (url) => {
-    try {
-      const response = await fetch(url)
-      const html = await response.text()
-      const match = html.match(/<title>(.*?)<\/title>/)
-      return match && match[1] ? match[1] : ''
-    } catch (error) {
-      console.error('Error fetching title:', error)
-      return ''
-    }
-  }
-
-  useEffect(() => {
-    const handleIframeLoad = async () => {
-      setIframeLoading(false)
-      try {
-        const iframeDocument = iframeRef.current.contentDocument
-        let title = iframeDocument?.title || ''
-
-        if (!title) {
-          console.log('Falling back to fetch method')
-          title = await fetchTitle(url)
-        }
-
-        if (title) {
-          const updatedVariables = { ...queryVariables, title: title }
-          handleQueryVariables(updatedVariables)
-        } else {
-          console.warn('No title found for the given URL')
-          alert('No title found for the given URL')
-        }
-      } catch (error) {
-        console.error('Error accessing iframe content:', error)
-        console.log('Falling back to fetch method')
-        const title = await fetchTitle(url)
-        if (title) {
-          const updatedVariables = { ...queryVariables, title: title }
-          handleQueryVariables(updatedVariables)
-        } else {
-          alert('Failed to fetch title')
-        }
-      }
-    }
-
-    const iframe = iframeRef.current
-    if (iframe) {
-      iframe.addEventListener('load', handleIframeLoad)
-    }
-
-    return () => {
-      if (iframe) {
-        iframe.removeEventListener('load', handleIframeLoad)
-      }
-    }
-  }, [queryVariables, handleQueryVariables, url])
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleWidthResize = useCallback(width => {
     setAsideWidth(width)
@@ -125,10 +67,37 @@ export const Sidebar = () => {
     [handlePresetChange]
   )
 
-  const handleSubmit = (e) => {
+  const fetchTitle = async (url) => {
+    try {
+      const response = await fetch(url)
+      const html = await response.text()
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(html, 'text/html')
+      return doc.title || ''
+    } catch (error) {
+      console.error('Error fetching title:', error)
+      return ''
+    }
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setIframeLoading(true)
-    iframeRef.current.src = url
+    setIsLoading(true)
+    try {
+      const title = await fetchTitle(url)
+      if (title) {
+        const updatedVariables = { ...queryVariables, title: title }
+        handleQueryVariables(updatedVariables)
+      } else {
+        console.warn('No title found for the given URL')
+        alert('No title found for the given URL')
+      }
+    } catch (error) {
+      console.error('Error fetching title:', error)
+      alert(`Failed to fetch title: ${error.message}`)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const toggleEditor = () => {
@@ -463,20 +432,13 @@ export const Sidebar = () => {
             <Button 
               type="submit" 
               sx={modernButtonStyle}
-              disabled={iframeLoading}
+              disabled={isLoading}
             >
-              {iframeLoading ? 'Loading...' : 'Submit'}
+              {isLoading ? 'Loading...' : 'Submit'}
             </Button>
           </Flex>
         </form>
       </Box>
-
-      <iframe
-        ref={iframeRef}
-        style={{ display: 'none' }}
-        title="Title Fetcher"
-        sandbox="allow-same-origin allow-scripts"
-      />
     </Flex>
   )
 }
