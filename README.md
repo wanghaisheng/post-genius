@@ -1,9 +1,16 @@
+
 # post-geniuous
 create same viral social media posts with one click
 
 
 
 https://github.com/wanghaisheng/avif.io
+
+
+## create template from image
+
+https://huggingface.co/spaces/Mr-Vicky-01/Screenshot-HTMLcode
+
 
 
 ## image post with text
