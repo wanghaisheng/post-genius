@@ -1,7 +1,7 @@
 /* globals ResizeObserver */
 
 import { motion, useTransform, useMotionValue, useSpring } from 'framer-motion'
-import { useContext, useEffect, useRef, useMemo, Fragment } from 'react'
+import { useContext, useEffect, useRef, useMemo, Fragment, useState } from 'react'
 import AspectRatio from 'react-aspect-ratio'
 import { Box, Flex } from 'theme-ui'
 
@@ -16,6 +16,7 @@ import {
 import { OVERLAY_STATE, PREVIEW_CARD_WIDTH } from '@/constants'
 import { AppContext } from '@/context'
 import { theme } from '@/theme'
+import { useQueryVariables } from '@/context/QueryVariablesContext'
 
 const getWidth = el => (el ? el.getBoundingClientRect().width : 0)
 
@@ -62,21 +63,24 @@ export const PreviewArea = ({ isEditor }) => {
     theme: { bg, color }
   } = useContext(AppContext)
 
+  const { queryVariables } = useQueryVariables()
+  const [previewKey, setPreviewKey] = useState(0)
+
   const mainRef = useRef()
 
-  const PreviewWrap = useMemo(() => (isEditor ? PreviewScaler : Fragment), [
-    isEditor
-  ])
+  const PreviewWrap = useMemo(() => (isEditor ? PreviewScaler : Fragment), [isEditor])
 
-  const wrapProps = useMemo(() => (isEditor ? { mainRef } : {}), [
-    isEditor,
-    mainRef
-  ])
+  const wrapProps = useMemo(() => (isEditor ? { mainRef } : {}), [isEditor, mainRef])
+
+  useEffect(() => {
+    setPreviewKey(prevKey => prevKey + 1)
+  }, [queryVariables])
 
   return (
     <Box
       as='main'
       ref={mainRef}
+      id="preview-area"
       sx={{
         flex: ['none', '', 1],
         overflow: 'hidden',
@@ -99,10 +103,10 @@ export const PreviewArea = ({ isEditor }) => {
         <AspectRatio ratio='16/9' style={{ minWidth: PREVIEW_CARD_WIDTH }}>
           <PreviewWrap {...wrapProps}>
             <LivePreview
-              onClick={
-                isEditor ? showOverlay(OVERLAY_STATE.PREVIEW) : undefined
-              }
+              key={previewKey}
+              onClick={isEditor ? showOverlay(OVERLAY_STATE.PREVIEW) : undefined}
               isEditor={isEditor}
+              queryVariables={queryVariables}
             />
           </PreviewWrap>
         </AspectRatio>

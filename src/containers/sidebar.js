@@ -1,7 +1,8 @@
 import { useCallback, useContext, useState, useRef } from 'react'
 import { Box, Flex, Input, Button, Switch, Label as ThemeUILabel } from 'theme-ui'
-import satori from 'satori'
+import dynamic from 'next/dynamic';
 import { saveAs } from 'file-saver'
+import { toPng } from 'html-to-image';
 
 import {
   ButtonIcon,
@@ -71,18 +72,26 @@ export const Sidebar = () => {
     e.preventDefault()
     setIsLoading(true)
     try {
+      console.log('Fetching title for URL:', url)
       const response = await fetch(`https://get-title.v2ray-tokyo.workers.dev/?url=${encodeURIComponent(url)}`)
+      console.log('Response status:', response.status)
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
+      
       const data = await response.json()
+      console.log('Parsed data:', data)
+      
       const { title } = data
       if (title) {
+        console.log('Title found:', title)
         const updatedVariables = { ...queryVariables, title: title }
         handleQueryVariables(updatedVariables)
         setUrl('')
       } else {
-        throw new Error('No title found')
+        console.log('No title found in response')
+        throw new Error('No title found in response')
       }
     } catch (error) {
       console.error('Error fetching title:', error)
@@ -110,39 +119,22 @@ export const Sidebar = () => {
 
   const handleDownload = async () => {
     try {
-      const previewElement = document.querySelector('.preview-area')
+      const previewElement = document.getElementById('preview-area');
       if (!previewElement) {
-        console.error('Preview element not found')
-        return
+        console.error('Preview element not found');
+        alert('Unable to generate image: Preview element not found');
+        return;
       }
 
-      const svg = await satori(previewElement, {
-        width: previewElement.clientWidth,
-        height: previewElement.clientHeight,
-        fonts: [
-          {
-            name: 'Roboto',
-            data: await fetch('/fonts/Roboto-Regular.ttf').then((res) => res.arrayBuffer()),
-            weight: 400,
-            style: 'normal',
-          },
-        ],
-      })
-
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      const img = new Image()
-      img.onload = () => {
-        canvas.width = img.width
-        canvas.height = img.height
-        ctx.drawImage(img, 0, 0)
-        canvas.toBlob((blob) => {
-          saveAs(blob, 'preview.png')
-        })
-      }
-      img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`
+      const dataUrl = await toPng(previewElement, { quality: 0.95 });
+      
+      const link = document.createElement('a');
+      link.download = 'preview.png';
+      link.href = dataUrl;
+      link.click();
     } catch (error) {
-      console.error('Error generating image:', error)
+      console.error('Error generating image:', error);
+      alert(`Failed to generate image: ${error.message}`);
     }
   }
 

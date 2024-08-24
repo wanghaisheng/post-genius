@@ -1,12 +1,14 @@
 import { createGlobalStyle } from 'styled-components'
 import { ThemeUIProvider } from 'theme-ui'
-import NextApp from 'next/app'
-
+import { useState, useEffect } from 'react'
 import 'react-aspect-ratio/aspect-ratio.css'
 
 import { notificationStyles } from '@/lib/notification'
 import AppContextProvider from '@/context'
 import { theme } from '@/theme'
+import ErrorBoundary from '../components/ErrorBoundary'
+import { useQueryVariables, QueryVariablesProvider } from '@/context/QueryVariablesContext'
+import { PreviewArea } from '@/containers/preview-area'
 
 const GlobalStylesheet = createGlobalStyle`
   * {
@@ -20,16 +22,33 @@ const GlobalStylesheet = createGlobalStyle`
   ${notificationStyles(theme)}
 `
 
-export default class App extends NextApp {
-  render () {
-    const { Component, pageProps } = this.props
-    return (
-      <ThemeUIProvider theme={theme}>
-        <GlobalStylesheet />
+function MyApp({ Component, pageProps }) {
+  return (
+    <QueryVariablesProvider>
+      <AppWithQueryVariables Component={Component} pageProps={pageProps} />
+    </QueryVariablesProvider>
+  )
+}
+
+function AppWithQueryVariables({ Component, pageProps }) {
+  const { queryVariables } = useQueryVariables()
+  const [previewKey, setPreviewKey] = useState(0)
+
+  useEffect(() => {
+    setPreviewKey(prevKey => prevKey + 1)
+  }, [queryVariables])
+
+  return (
+    <ThemeUIProvider theme={theme}>
+      <GlobalStylesheet />
+      <ErrorBoundary>
         <AppContextProvider>
           <Component {...pageProps} />
+          <PreviewArea queryVariables={queryVariables} key={previewKey} />
         </AppContextProvider>
-      </ThemeUIProvider>
-    )
-  }
+      </ErrorBoundary>
+    </ThemeUIProvider>
+  )
 }
+
+export default MyApp
