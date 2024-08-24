@@ -68,24 +68,37 @@ export const Sidebar = () => {
   )
 
   const fetchTitle = async (url) => {
+    console.log('Fetching title for URL:', url)
     try {
+      console.log('Sending fetch request...')
       const response = await fetch(url)
+      console.log('Fetch response received:', response.status, response.statusText)
+      
       const html = await response.text()
+      console.log('HTML content length:', html.length)
+      
       const parser = new DOMParser()
       const doc = parser.parseFromString(html, 'text/html')
+      console.log('HTML parsed, document title:', doc.title)
+      
       return doc.title || ''
     } catch (error) {
-      console.error('Error fetching title:', error)
+      console.error('Error in fetchTitle:', error)
       return ''
     }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log('Form submitted with URL:', url)
     setIsLoading(true)
     try {
+      console.log('Calling fetchTitle...')
       const title = await fetchTitle(url)
+      console.log('Title fetched:', title)
+      
       if (title) {
+        console.log('Updating query variables with new title')
         const updatedVariables = { ...queryVariables, title: title }
         handleQueryVariables(updatedVariables)
       } else {
@@ -93,10 +106,11 @@ export const Sidebar = () => {
         alert('No title found for the given URL')
       }
     } catch (error) {
-      console.error('Error fetching title:', error)
+      console.error('Error in handleSubmit:', error)
       alert(`Failed to fetch title: ${error.message}`)
     } finally {
       setIsLoading(false)
+      console.log('Loading state set to false')
     }
   }
 
@@ -412,7 +426,10 @@ export const Sidebar = () => {
             <Input
               type="url"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => {
+                console.log('URL input changed:', e.target.value)
+                setUrl(e.target.value)
+              }}
               placeholder="Enter URL"
               required
               sx={{ 
