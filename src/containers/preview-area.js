@@ -3,7 +3,7 @@
 import { motion, useTransform, useMotionValue, useSpring } from 'framer-motion'
 import { useContext, useEffect, useRef, useMemo, Fragment, useState } from 'react'
 import AspectRatio from 'react-aspect-ratio'
-import { Box, Flex, Input, Spinner } from 'theme-ui'
+import { Box, Flex, Input, Spinner, Select, Textarea, ColorPicker } from 'theme-ui'
 
 import {
   InternalLink,
@@ -17,6 +17,7 @@ import { OVERLAY_STATE, PREVIEW_CARD_WIDTH } from '@/constants'
 import { AppContext } from '@/context'
 import { theme } from '@/theme'
 import { useQueryVariables } from '@/context/QueryVariablesContext'
+import { parseHTML, generateHTML } from '@/lib/htmlParser'
 
 const getWidth = el => (el ? el.getBoundingClientRect().width : 0)
 
@@ -56,7 +57,7 @@ const PreviewScaler = ({ mainRef, ...props }) => {
   return <motion.div style={{ scale }} {...props} />
 }
 
-export const PreviewArea = ({ isEditor, setEditorContent }) => {
+export const PreviewArea = ({ isEditor, editorContent, setEditorContent }) => {
   const {
     downloadScreenshot,
     showOverlay,
@@ -67,6 +68,14 @@ export const PreviewArea = ({ isEditor, setEditorContent }) => {
   const [previewKey, setPreviewKey] = useState(0)
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [uiMode, setUiMode] = useState(false)
+  const [parsedContent, setParsedContent] = useState({
+    text: '',
+    image: '',
+    font: 'Arial',
+    backgroundColor: '#ffffff',
+    textColor: '#000000'
+  })
 
   const mainRef = useRef()
 
@@ -77,6 +86,13 @@ export const PreviewArea = ({ isEditor, setEditorContent }) => {
   useEffect(() => {
     setPreviewKey(prevKey => prevKey + 1)
   }, [queryVariables])
+
+  useEffect(() => {
+    if (uiMode) {
+      const parsed = parseHTML(editorContent)
+      setParsedContent(parsed)
+    }
+  }, [uiMode, editorContent])
 
   const handleDownload = async () => {
     if (!mainRef.current) return
@@ -143,6 +159,19 @@ export const PreviewArea = ({ isEditor, setEditorContent }) => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleUiChange = (key, value) => {
+    setParsedContent(prev => ({ ...prev, [key]: value }))
+  }
+
+  const applyUiChanges = () => {
+    const newHtml = generateHTML(parsedContent)
+    setEditorContent(newHtml)
+  }
+
+  const toggleUiMode = () => {
+    setUiMode(!uiMode)
   }
 
   return (
@@ -262,6 +291,62 @@ export const PreviewArea = ({ isEditor, setEditorContent }) => {
           </Box>
 
           <Flex sx={{ flexDirection: 'column', gap: 3, mt: 3 }}>
+            <Button onClick={handleDownload}>
+              Download Preview
+            </Button>
+            <Flex sx={{ alignItems: 'center', gap: 2 }}>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              <Button onClick={handleFromImage} disabled={loading}>
+                {loading ? <Spinner size={16} /> : 'From Image'}
+              </Button>
+            </Flex>
+            <Button onClick={toggleUiMode}>
+              {uiMode ? 'Switch to Code Mode' : 'Switch to UI Mode'}
+            </Button>
+            {uiMode && (
+              <Box>
+                <Textarea
+                  value={parsedContent.text}
+                  onChange={(e) => handleUiChange('text', e.target.value)}
+                  placeholder="Enter text"
+                />
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0]
+                    const reader = new FileReader()
+                    reader.onloadend = () => {
+                      handleUiChange('image', reader.result)
+                    }
+                    reader.readAsDataURL(file)
+                  }}
+                />
+                <Select
+                  value={parsedContent.font}
+                  onChange={(e) => handleUiChange('font', e.target.value)}
+                >
+                  <option>Arial</option>
+                  <option>Helvetica</option>
+                  <option>Times New Roman</option>
+                  <option>Courier</option>
+                </Select>
+                <ColorPicker
+                  value={parsedContent.backgroundColor}
+                  onChange={(color) => handleUiChange('backgroundColor', color)}
+                />
+                <ColorPicker
+                  value={parsedContent.textColor}
+                  onChange={(color) => handleUiChange('textColor', color)}
+                />
+                <Button onClick={applyUiChanges}>Apply Changes</Button>
+              </Box>
+            )}
+          </Flex>
         </>
       )}
     </Box>
