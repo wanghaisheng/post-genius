@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState, useRef, useEffect } from 'react'
+import { useCallback, useContext, useState, useRef } from 'react'
 import { Box, Flex, Input, Button, Switch, Label as ThemeUILabel } from 'theme-ui'
 import satori from 'satori'
 import { saveAs } from 'file-saver'
@@ -54,7 +54,6 @@ export const Sidebar = () => {
   const [isQueryVarExpanded, setIsQueryVarExpanded] = useState(true)
   const [isUIMode, setIsUIMode] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const iframeRef = useRef(null)
 
   const handleWidthResize = useCallback(width => {
     setAsideWidth(width)
@@ -68,76 +67,28 @@ export const Sidebar = () => {
     [handlePresetChange]
   )
 
-  const fetchTitleFromServer = async (url) => {
-    console.log('Fetching title from server for URL:', url)
-    const response = await fetch(`/api/get-title?url=${encodeURIComponent(url)}`)
-    const data = await response.json()
-    if (response.ok) {
-      return data.title
-    } else {
-      throw new Error(data.error || 'Failed to fetch title from server')
-    }
-  }
-
-  const fetchTitleFromIframe = () => {
-    return new Promise((resolve, reject) => {
-      const iframe = iframeRef.current
-      if (!iframe) {
-        reject(new Error('Iframe not found'))
-        return
-      }
-
-      const handleLoad = () => {
-        try {
-          const title = iframe.contentDocument?.title || ''
-          resolve(title)
-        } catch (error) {
-          reject(error)
-        } finally {
-          iframe.removeEventListener('load', handleLoad)
-        }
-      }
-
-      iframe.addEventListener('load', handleLoad)
-      iframe.src = url
-    })
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Form submitted with URL:', url)
     setIsLoading(true)
     try {
-      // Try server-side first
-      console.log('Attempting server-side title fetch')
-      const title = await fetchTitleFromServer(url)
-      console.log('Title fetched from server:', title)
-      
+      const response = await fetch(`https://get-title.v2ray-tokyo.workers.dev/?url=${encodeURIComponent(url)}`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      const { title } = data
       if (title) {
-        console.log('Updating query variables with new title')
         const updatedVariables = { ...queryVariables, title: title }
         handleQueryVariables(updatedVariables)
+        setUrl('')
       } else {
-        // If server-side fails, try client-side iframe method
-        console.log('Server-side fetch failed, attempting client-side iframe method')
-        const iframeTitle = await fetchTitleFromIframe()
-        console.log('Title fetched from iframe:', iframeTitle)
-        
-        if (iframeTitle) {
-          console.log('Updating query variables with iframe title')
-          const updatedVariables = { ...queryVariables, title: iframeTitle }
-          handleQueryVariables(updatedVariables)
-        } else {
-          console.warn('No title found for the given URL')
-          alert('No title found for the given URL')
-        }
+        throw new Error('No title found')
       }
     } catch (error) {
-      console.error('Error in handleSubmit:', error)
+      console.error('Error fetching title:', error)
       alert(`Failed to fetch title: ${error.message}`)
     } finally {
       setIsLoading(false)
-      console.log('Loading state set to false')
     }
   }
 
@@ -333,10 +284,10 @@ export const Sidebar = () => {
           <Box sx={{ ml: '6px' }}>
             <ButtonIcon
               as='button'
-              title='Change color mode'
-              onClick={changeTheme}
+              title='Toggle theme'
               color={iconColor}
               hoverColor={color}
+              onClick={changeTheme}
             >
               <ThemeIcon />
             </ButtonIcon>
@@ -453,10 +404,7 @@ export const Sidebar = () => {
             <Input
               type="url"
               value={url}
-              onChange={(e) => {
-                console.log('URL input changed:', e.target.value)
-                setUrl(e.target.value)
-              }}
+              onChange={(e) => setUrl(e.target.value)}
               placeholder="Enter URL"
               required
               sx={{ 
@@ -478,18 +426,11 @@ export const Sidebar = () => {
               sx={modernButtonStyle}
               disabled={isLoading}
             >
-              {isLoading ? 'Loading...' : 'Submit'}
+              {isLoading ? 'Loading...' : 'Get Title'}
             </Button>
           </Flex>
         </form>
       </Box>
-
-      <iframe
-        ref={iframeRef}
-        style={{ display: 'none' }}
-        title="Title Fetcher"
-        sandbox="allow-same-origin allow-scripts"
-      />
     </Flex>
   )
 }
