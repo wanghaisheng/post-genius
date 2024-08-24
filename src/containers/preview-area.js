@@ -3,7 +3,7 @@
 import { motion, useTransform, useMotionValue, useSpring } from 'framer-motion'
 import { useContext, useEffect, useRef, useMemo, Fragment, useState } from 'react'
 import AspectRatio from 'react-aspect-ratio'
-import { Box, Flex } from 'theme-ui'
+import { Box, Flex, Input, Spinner } from 'theme-ui'
 
 import {
   InternalLink,
@@ -56,7 +56,7 @@ const PreviewScaler = ({ mainRef, ...props }) => {
   return <motion.div style={{ scale }} {...props} />
 }
 
-export const PreviewArea = ({ isEditor }) => {
+export const PreviewArea = ({ isEditor, setEditorContent }) => {
   const {
     downloadScreenshot,
     showOverlay,
@@ -65,6 +65,8 @@ export const PreviewArea = ({ isEditor }) => {
 
   const { queryVariables } = useQueryVariables()
   const [previewKey, setPreviewKey] = useState(0)
+  const [file, setFile] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const mainRef = useRef()
 
@@ -75,6 +77,73 @@ export const PreviewArea = ({ isEditor }) => {
   useEffect(() => {
     setPreviewKey(prevKey => prevKey + 1)
   }, [queryVariables])
+
+  const handleDownload = async () => {
+    if (!mainRef.current) return
+
+    const html = mainRef.current.innerHTML
+    const css = '' // Add any additional CSS here
+
+    try {
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ html, css }),
+      })
+
+      if (!response.ok) throw new Error('Failed to generate image')
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.style.display = 'none'
+      a.href = url
+      a.download = 'preview.png'
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading image:', error)
+      alert('Failed to download image. Please try again.')
+    }
+  }
+
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0])
+  }
+
+  const handleFromImage = async () => {
+    if (!file) {
+      alert('Please select a file')
+      return
+    }
+    
+    setLoading(true)
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('https://<your-cloudflare-worker-url>', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+
+      const data = await response.text()
+      setEditorContent(data)
+    } catch (error) {
+      console.error('Error:', error)
+      alert('An error occurred while processing the file')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <Box
@@ -191,6 +260,8 @@ export const PreviewArea = ({ isEditor }) => {
           <Box sx={{ bottom: 0, position: 'absolute', width: '100%' }}>
             <LiveError />
           </Box>
+
+          <Flex sx={{ flexDirection: 'column', gap: 3, mt: 3 }}>
         </>
       )}
     </Box>
