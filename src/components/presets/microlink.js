@@ -5,7 +5,7 @@ const query = {
   color: '#313b53',
   bg: 'white',
   title: 'Microlink Cards',
-  logo: 'https://cdn.microlink.io/logo/logo.svg'
+  logo: 'https://cdn.cards.n0nft.com/logo/logo.svg'
 }
 
 const code = (

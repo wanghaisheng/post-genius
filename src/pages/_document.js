@@ -40,7 +40,7 @@ export default class MyDocument extends Document {
             href='https://fonts.gstatic.com'
             crossOrigin='true'
           />
-          <link rel='preconnect' href='https://cdn.microlink.io' />
+          <link rel='preconnect' href='https://cdn.cards.n0nft.com' />
           <link
             href='https://fonts.googleapis.com/css2?family=Inter:wght@100;200;400;500;600&display=swap'
             rel='stylesheet'
@@ -55,71 +55,71 @@ export default class MyDocument extends Document {
           <link
             rel='apple-touch-icon-precomposed'
             sizes='57x57'
-            href='https://cdn.microlink.io/logo/apple-touch-icon-57x57.png'
+            href='https://cdn.cards.n0nft.com/logo/apple-touch-icon-57x57.png'
           />
           <link
             rel='apple-touch-icon-precomposed'
             sizes='114x114'
-            href='https://cdn.microlink.io/logo/apple-touch-icon-114x114.png'
+            href='https://cdn.cards.n0nft.com/logo/apple-touch-icon-114x114.png'
           />
           <link
             rel='apple-touch-icon-precomposed'
             sizes='72x72'
-            href='https://cdn.microlink.io/logo/apple-touch-icon-72x72.png'
+            href='https://cdn.cards.n0nft.com/logo/apple-touch-icon-72x72.png'
           />
           <link
             rel='apple-touch-icon-precomposed'
             sizes='144x144'
-            href='https://cdn.microlink.io/logo/apple-touch-icon-144x144.png'
+            href='https://cdn.cards.n0nft.com/logo/apple-touch-icon-144x144.png'
           />
           <link
             rel='apple-touch-icon-precomposed'
             sizes='60x60'
-            href='https://cdn.microlink.io/logo/apple-touch-icon-60x60.png'
+            href='https://cdn.cards.n0nft.com/logo/apple-touch-icon-60x60.png'
           />
           <link
             rel='apple-touch-icon-precomposed'
             sizes='120x120'
-            href='https://cdn.microlink.io/logo/apple-touch-icon-120x120.png'
+            href='https://cdn.cards.n0nft.com/logo/apple-touch-icon-120x120.png'
           />
           <link
             rel='apple-touch-icon-precomposed'
             sizes='76x76'
-            href='https://cdn.microlink.io/logo/apple-touch-icon-76x76.png'
+            href='https://cdn.cards.n0nft.com/logo/apple-touch-icon-76x76.png'
           />
           <link
             rel='apple-touch-icon-precomposed'
             sizes='152x152'
-            href='https://cdn.microlink.io/logo/apple-touch-icon-152x152.png'
+            href='https://cdn.cards.n0nft.com/logo/apple-touch-icon-152x152.png'
           />
           <link
             rel='icon'
             type='image/png'
-            href='https://cdn.microlink.io/logo/favicon-196x196.png'
+            href='https://cdn.cards.n0nft.com/logo/favicon-196x196.png'
             sizes='196x196'
           />
           <link
             rel='icon'
             type='image/png'
-            href='https://cdn.microlink.io/logo/favicon-96x96.png'
+            href='https://cdn.cards.n0nft.com/logo/favicon-96x96.png'
             sizes='96x96'
           />
           <link
             rel='icon'
             type='image/png'
-            href='https://cdn.microlink.io/logo/favicon-32x32.png'
+            href='https://cdn.cards.n0nft.com/logo/favicon-32x32.png'
             sizes='32x32'
           />
           <link
             rel='icon'
             type='image/png'
-            href='https://cdn.microlink.io/logo/favicon-16x16.png'
+            href='https://cdn.cards.n0nft.com/logo/favicon-16x16.png'
             sizes='16x16'
           />
           <link
             rel='icon'
             type='image/png'
-            href='https://cdn.microlink.io/logo/favicon-128.png'
+            href='https://cdn.cards.n0nft.com/logo/favicon-128.png'
             sizes='128x128'
           />
         </Head>

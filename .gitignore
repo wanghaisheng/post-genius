@@ -37,4 +37,4 @@ coverage
 .next
 .now
 .lighthouseci
-.out
+out/*

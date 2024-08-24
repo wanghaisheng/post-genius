@@ -2,9 +2,9 @@ import Inline from '../inline.macro'
 import { Box, Fetch, Flex, Image, Link, Spinner, Text, polished } from './scope'
 
 const query = {
-  url: 'https://analytics.microlink.io/',
-  logo: 'https://cdn.microlink.io/logo/logo.svg',
-  title: 'microlink.io API · Analytics',
+  url: 'https://analytics.cards.n0nft.com/',
+  logo: 'https://cdn.cards.n0nft.com/logo/logo.svg',
+  title: 'cards.n0nft.com API · Analytics',
   theme: 'dark',
   themes: {
     dark: {

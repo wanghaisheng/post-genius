@@ -12,7 +12,7 @@ export default function OverlayAbout () {
     <>
       <Box as='header'>
         <Image
-          src='https://cdn.microlink.io/banner/cards.png'
+          src='https://cdn.cards.n0nft.com/banner/cards.png'
           alt='microlink cards'
         />
       </Box>
@@ -31,7 +31,7 @@ export default function OverlayAbout () {
         forever. Read more into{' '}
         <ExternalLink
           sx={{ textDecoration: 'none', color: contrast }}
-          href='https://microlink.io/docs/cards/getting-started/overview'
+          href='https://cards.n0nft.com/docs/cards/getting-started/overview'
         >
           documentation
         </ExternalLink>

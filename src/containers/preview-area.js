@@ -119,14 +119,14 @@ export const PreviewArea = ({ isEditor }) => {
             }}
           >
             <ExternalLink
-              href='https://microlink.io'
+              href='https://cards.n0nft.com'
               title='Microlink – Browser as API'
               sx={{
                 mr: 2,
                 width: '24px',
                 height: '24px',
                 background:
-                  "url('https://cdn.microlink.io/logo/logo.svg') no-repeat center center / 22px",
+                  "url('https://cdn.cards.n0nft.com/logo/logo.svg') no-repeat center center / 22px",
                 fontSize: '0px',
                 color: 'transparent',
                 userSelect: 'none'
@@ -138,7 +138,7 @@ export const PreviewArea = ({ isEditor }) => {
             {[
               {
                 href:
-                  'https://microlink.io/docs/cards/getting-started/overview',
+                  'https://cards.n0nft.com/docs/cards/getting-started/overview',
                 children: 'Docs',
                 title: 'Read documentation',
                 rel: ''

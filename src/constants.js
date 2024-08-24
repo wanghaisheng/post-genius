@@ -33,8 +33,8 @@ export const OVERLAY_STATE = {
 
 export const META = {
   description: pkg.description,
-  image: 'https://cdn.microlink.io/banner/cards.png',
-  logo: 'https://cdn.microlink.io/logo/trim.png',
+  image: 'https://cdn.cards.n0nft.com/banner/cards.png',
+  logo: 'https://cdn.cards.n0nft.com/logo/trim.png',
   title: 'Microlink Cards',
   twitter: '@wanghaisheng',
   url: pkg.homepage

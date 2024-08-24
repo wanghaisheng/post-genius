@@ -1,12 +1,12 @@
 {
   "name": "postgenius",
   "description": "The easiest way to generate dynamic social images at scale.",
-  "homepage": "https://cards.microlink.io",
+  "homepage": "https://cards.cards.n0nft.com",
   "version": "1.13.78",
   "author": {
-    "email": "hello@microlink.io",
-    "name": "microlink.io",
-    "url": "https://microlink.io"
+    "email": "hello@cards.n0nft.com",
+    "name": "cards.n0nft.com",
+    "url": "https://cards.n0nft.com"
   },
   "repository": {
     "directory": "packages/app",
@@ -38,6 +38,7 @@
     "babel-plugin-macros": "~3.1.0",
     "cycled": "~2.0.0",
     "deep-object-diff": "~1.1.9",
+    "file-saver": "^2.0.5",
     "framer-motion": "~11.0.2",
     "jsdom": "^24.1.1",
     "lz-ts": "~1.1.2",
@@ -52,6 +53,7 @@
     "react-live": "~4.1.3",
     "react-select": "~5.8.0",
     "react-tabs": "~6.0.0",
+    "satori": "^0.10.14",
     "styled-components": "~6.1.1",
     "theme-ui": "~0.16.0",
     "throttle-debounce": "~5.0.0",
