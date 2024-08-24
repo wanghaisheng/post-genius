@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     }
 
     if (!contentType || !contentType.includes('text/html')) {
-      return res.status(415).json({ error: `Unexpected content type: ${contentType}` })
+      return res.status(415).json({ error: 'URL does not return HTML content' })
     }
 
     const html = await response.text()
