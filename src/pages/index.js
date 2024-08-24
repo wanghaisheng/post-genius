@@ -2,6 +2,7 @@ import { AppFrame, Spinner } from '@/components'
 import { useEffect, useState } from 'react'
 import { PreviewArea } from '@/containers'
 import { useRouter } from 'next/router'
+import { Box, Input, Button } from 'theme-ui'
 
 export default function Index () {
   const router = useRouter()
@@ -41,19 +42,20 @@ export default function Index () {
       {isLoading ? (
         <Spinner />
       ) : (
-        <>
-          <form onSubmit={handleSubmit}>
-            <input
+        <Box sx={{ width: '100%', maxWidth: '600px', margin: 'auto', padding: 3 }}>
+          <form onSubmit={handleSubmit} sx={{ marginBottom: 3 }}>
+            <Input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="Enter URL"
               required
+              sx={{ marginBottom: 2 }}
             />
-            <button type="submit">Submit</button>
+            <Button type="submit">Submit</Button>
           </form>
           <PreviewArea isEditor={false} />
-        </>
+        </Box>
       )}
     </AppFrame>
   )
