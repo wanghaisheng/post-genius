@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from 'react'
+import { useCallback, useContext, useState, useRef, useEffect } from 'react'
 import { Box, Flex, Input, Button, Switch, Label as ThemeUILabel } from 'theme-ui'
 import satori from 'satori'
 import { saveAs } from 'file-saver'
@@ -54,6 +54,65 @@ export const Sidebar = () => {
   const [isQueryVarExpanded, setIsQueryVarExpanded] = useState(true)
   const [isUIMode, setIsUIMode] = useState(false)
 
+  const iframeRef = useRef(null)
+  const [iframeLoading, setIframeLoading] = useState(false)
+
+  const fetchTitle = async (url) => {
+    try {
+      const response = await fetch(url)
+      const html = await response.text()
+      const match = html.match(/<title>(.*?)<\/title>/)
+      return match && match[1] ? match[1] : ''
+    } catch (error) {
+      console.error('Error fetching title:', error)
+      return ''
+    }
+  }
+
+  useEffect(() => {
+    const handleIframeLoad = async () => {
+      setIframeLoading(false)
+      try {
+        const iframeDocument = iframeRef.current.contentDocument
+        let title = iframeDocument?.title || ''
+
+        if (!title) {
+          console.log('Falling back to fetch method')
+          title = await fetchTitle(url)
+        }
+
+        if (title) {
+          const updatedVariables = { ...queryVariables, title: title }
+          handleQueryVariables(updatedVariables)
+        } else {
+          console.warn('No title found for the given URL')
+          alert('No title found for the given URL')
+        }
+      } catch (error) {
+        console.error('Error accessing iframe content:', error)
+        console.log('Falling back to fetch method')
+        const title = await fetchTitle(url)
+        if (title) {
+          const updatedVariables = { ...queryVariables, title: title }
+          handleQueryVariables(updatedVariables)
+        } else {
+          alert('Failed to fetch title')
+        }
+      }
+    }
+
+    const iframe = iframeRef.current
+    if (iframe) {
+      iframe.addEventListener('load', handleIframeLoad)
+    }
+
+    return () => {
+      if (iframe) {
+        iframe.removeEventListener('load', handleIframeLoad)
+      }
+    }
+  }, [queryVariables, handleQueryVariables, url])
+
   const handleWidthResize = useCallback(width => {
     setAsideWidth(width)
     store.set(ASIDE_WIDTH_KEY, width)
@@ -66,51 +125,10 @@ export const Sidebar = () => {
     [handlePresetChange]
   )
 
-  const corsProxies = [
-    'https://api.allorigins.win/raw?url=',
-    'https://cors.bridged.cc/',
-    'https://cors-anywhere.herokuapp.com/'
-  ]
-
-  const fetchWithProxy = async (url, proxyIndex = -1) => {
-    if (proxyIndex >= corsProxies.length) {
-      throw new Error('All proxies failed')
-    }
-
-    try {
-      const fetchUrl = proxyIndex === -1 ? url : corsProxies[proxyIndex] + encodeURIComponent(url)
-      const response = await fetch(fetchUrl)
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-      return await response.text()
-    } catch (error) {
-      if (proxyIndex === -1) {
-        console.warn('Direct fetch failed, trying proxies:', error)
-      } else {
-        console.warn(`Proxy ${corsProxies[proxyIndex]} failed:`, error)
-      }
-      return fetchWithProxy(url, proxyIndex + 1)
-    }
-  }
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
-    try {
-      const html = await fetchWithProxy(url)
-      const parser = new DOMParser()
-      const doc = parser.parseFromString(html, 'text/html')
-      const title = doc.querySelector('title')?.textContent || ''
-
-      if (title) {
-        const updatedVariables = { ...queryVariables, title: title }
-        handleQueryVariables(updatedVariables)
-      } else {
-        console.warn('No title found for the given URL')
-        alert('No title found for the given URL')
-      }
-    } catch (error) {
-      console.error('Error fetching title:', error)
-      alert(`Failed to fetch title: ${error.message}`)
-    }
+    setIframeLoading(true)
+    iframeRef.current.src = url
   }
 
   const toggleEditor = () => {
@@ -445,12 +463,20 @@ export const Sidebar = () => {
             <Button 
               type="submit" 
               sx={modernButtonStyle}
+              disabled={iframeLoading}
             >
-              Submit
+              {iframeLoading ? 'Loading...' : 'Submit'}
             </Button>
           </Flex>
         </form>
       </Box>
+
+      <iframe
+        ref={iframeRef}
+        style={{ display: 'none' }}
+        title="Title Fetcher"
+        sandbox="allow-same-origin allow-scripts"
+      />
     </Flex>
   )
 }
